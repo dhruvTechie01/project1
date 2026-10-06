@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CleanAir AI — Report. Route. Rescue.</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,450;9..144,550;9..144,650&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --obsidian:#0B0F19;
+    --panel:#0F1524;
+    --emerald:#10B981;
+    --emerald-dim:#065F46;
+    --amber:#F59E0B;
+    --rose:#F43F5E;
+    --ink:#E5E9F0;
+    --muted:#8B93A7;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--obsidian);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .font-display{font-family:'Fraunces',serif;}
+  .font-mono{font-family:'JetBrains Mono',monospace;}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#1e293b;border-radius:99px;}
+
+  .glass-panel{
+    background: rgba(15,21,36,0.55);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(148,163,184,0.08);
+  }
+  .glass-nav{
+    background: rgba(11,15,25,0.6);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
+
+  .glow-emerald{ box-shadow: 0 0 60px rgba(16,185,129,0.06); }
+  .glow-amber{ box-shadow: 0 0 60px rgba(245,158,11,0.07); }
+  .glow-btn{ box-shadow: 0 0 0 1px rgba(16,185,129,0.3), 0 8px 30px rgba(16,185,129,0.25); }
+  .glow-btn:hover{ box-shadow: 0 0 0 1px rgba(16,185,129,0.5), 0 10px 40px rgba(16,185,129,0.35); }
+
+  .blob{ position:absolute; border-radius:9999px; filter: blur(90px); pointer-events:none; }
+  @keyframes drift-a{ 0%,100%{ transform: translate(0,0) scale(1);} 50%{ transform: translate(26px,-20px) scale(1.06);} }
+  @keyframes drift-b{ 0%,100%{ transform: translate(0,0) scale(1);} 50%{ transform: translate(-22px,18px) scale(1.04);} }
+  .blob-a{ animation: drift-a 15s ease-in-out infinite; }
+  .blob-b{ animation: drift-b 17s ease-in-out infinite; }
+
+  @keyframes float-y{ 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(-8px);} }
+  .float-card{ animation: float-y 6.5s ease-in-out infinite; }
+
+  @keyframes fade-scale-in{ from{ opacity:0; transform: translateY(18px) scale(0.98);} to{ opacity:1; transform: translateY(0) scale(1);} }
+  .fade-scale-in{ animation: fade-scale-in .6s cubic-bezier(.16,1,.3,1) both; }
+
+  @keyframes fade-slide-left{ from{ opacity:0; transform: translateX(24px);} to{ opacity:1; transform: translateX(0);} }
+  .fade-slide-left{ animation: fade-slide-left .45s cubic-bezier(.16,1,.3,1) both; }
+
+  @keyframes checkmark-pop{
+    0%{ transform: scale(0.5); opacity:0; }
+    60%{ transform: scale(1.15); opacity:1; }
+    100%{ transform: scale(1); opacity:1; }
+  }
+  .checkmark-pop{ animation: checkmark-pop .55s cubic-bezier(.34,1.56,.64,1) both; }
+
+  @keyframes stroke-draw{ from{ stroke-dashoffset:40; } to{ stroke-dashoffset:0; } }
+  .stroke-draw{ stroke-dasharray:40; animation: stroke-draw .5s ease-out .2s forwards; stroke-dashoffset:40; }
+
+  @keyframes sparkle-twinkle{ 0%,100%{ opacity:1; transform: scale(1) rotate(0deg);} 50%{ opacity:.6; transform: scale(1.2) rotate(15deg);} }
+  .sparkle-twinkle{ animation: sparkle-twinkle 2.4s ease-in-out infinite; }
+
+  @keyframes shimmer-bar{ 0%{ background-position:-300px 0; } 100%{ background-position:300px 0; } }
+  .shimmer{
+    background: linear-gradient(90deg, #131a2b 0%, #1a2236 20%, #131a2b 40%);
+    background-size: 600px 100%;
+    animation: shimmer-bar 1.6s ease-in-out infinite;
+  }
+
+  @keyframes toast-rise{ from{ opacity:0; transform: translate(-50%,16px) scale(0.96);} to{ opacity:1; transform: translate(-50%,0) scale(1);} }
+  @keyframes toast-fall{ from{ opacity:1; transform: translate(-50%,0) scale(1);} to{ opacity:0; transform: translate(-50%,16px) scale(0.96);} }
+  .toast-rise{ animation: toast-rise .5s cubic-bezier(.16,1,.3,1) both; }
+  .toast-fall{ animation: toast-fall .35s ease-in forwards; }
+
+  @keyframes gentle-ring{ 0%{ box-shadow:0 0 0 0 rgba(244,63,94,0.3);} 70%{ box-shadow:0 0 0 10px rgba(244,63,94,0);} 100%{ box-shadow:0 0 0 0 rgba(244,63,94,0);} }
+  .gentle-ring{ animation: gentle-ring 2.4s ease-out infinite; }
+
+  @keyframes flow-dash{ to{ stroke-dashoffset:-32; } }
+  .flow-dash{ stroke-dasharray:5 5; animation: flow-dash 1s linear infinite; }
+
+  @keyframes drive-across{ 0%{ left:4%; } 100%{ left:74%; } }
+  .drive-across{ animation: drive-across 3.4s ease-in-out infinite alternate; }
+
+  @keyframes counter-pop{ 0%{ transform:scale(1);} 35%{ transform:scale(1.28); color:var(--amber);} 100%{ transform:scale(1);} }
+  .counter-pulse{ animation: counter-pop .6s cubic-bezier(.34,1.56,.64,1); }
+
+  /* Floating label inputs */
+  .float-input-wrap{ position:relative; }
+  .float-input{
+    width:100%; background: rgba(255,255,255,0.03); border:1px solid rgba(148,163,184,0.15);
+    border-radius: 1rem; padding: 1.25rem 1rem 0.6rem 1rem; color:var(--ink); font-size:14.5px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .float-input:focus{ border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(16,185,129,0.12); outline:none; }
+  .float-label{
+    position:absolute; left:1rem; top:1.05rem; font-size:13.5px; color:var(--muted);
+    transition: all .18s ease; pointer-events:none;
+  }
+  .float-input:focus + .float-label,
+  .float-input:not(:placeholder-shown) + .float-label{
+    top:0.45rem; font-size:10.5px; color:var(--emerald);
+  }
+
+  .otp-input{
+    width:56px; height:64px; text-align:center; font-size:24px; font-family:'JetBrains Mono',monospace;
+    background: rgba(255,255,255,0.03); border:1px solid rgba(148,163,184,0.18); border-radius:1rem;
+    color:var(--ink); transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .otp-input:focus{ border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(16,185,129,0.14); outline:none; }
+
+  .drop-zone{ transition: all .3s cubic-bezier(.16,1,.3,1); }
+  .drop-zone:hover, .drop-zone.drag-active{
+    border-color: rgba(16,185,129,0.4);
+    box-shadow: 0 0 40px rgba(16,185,129,0.1);
+  }
+
+  .pill-btn{ transition: all .25s cubic-bezier(.16,1,.3,1); }
+  .pill-btn:hover{ transform: translateY(-2px); }
+
+  .step-track::after{
+    content:''; position:absolute; top:28px; left:calc(100% + 8px); width:calc(100% - 16px); height:1.5px;
+    background: linear-gradient(90deg, rgba(148,163,184,0.2), transparent);
+  }
+  @media (max-width:1023px){ .step-track::after{ display:none; } }
+
+  input:focus, button:focus{ outline: 2px solid var(--emerald); outline-offset: 3px; }
+
+  #authScreen{ transition: opacity .5s ease, visibility .5s ease; }
+  #authScreen.auth-hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+  #dashboard{ transition: opacity .5s ease; }
+  #dashboard.dash-hidden{ opacity:0; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+  }
+</style>
+</head>
+<body class="antialiased relative overflow-x-hidden">
+
+<!-- Ambient background blobs -->
+<div class="fixed inset-0 -z-10 overflow-hidden">
+  <div class="blob blob-a w-[32rem] h-[32rem] bg-emerald-500/10 -top-32 -left-24"></div>
+  <div class="blob blob-b w-[28rem] h-[28rem] bg-amber-500/8 top-1/2 -right-20"></div>
+  <div class="blob blob-a w-[24rem] h-[24rem] bg-sky-500/6 bottom-0 left-1/3"></div>
+</div>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div id="authScreen" class="min-h-screen flex items-center justify-center px-5 py-10 relative z-20">
+  <div class="fade-scale-in glass-panel glow-emerald rounded-[2rem] w-full max-w-md p-8 sm:p-10">
+
+    <div class="flex items-center gap-2.5 mb-8">
+      <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M12 2C8 6 5 9.5 5 13.5C5 17.6 8.1 21 12 21C15.9 21 19 17.6 19 13.5C19 9.5 16 6 12 2Z" stroke="white" stroke-width="1.9" stroke-linejoin="round"/></svg>
+      </div>
+      <p class="font-display font-medium text-[17px] tracking-tight text-white">CleanAir <span class="text-emerald-400">AI</span></p>
+    </div>
+
+    <!-- Step 1: credentials -->
+    <div id="authStepCredentials">
+      <h2 class="font-display text-[24px] font-medium text-white mb-1.5">Welcome</h2>
+      <p class="text-[13.5px] text-slate-400 mb-7">Sign in to report issues and track your civic impact.</p>
+
+      <div class="float-input-wrap mb-4">
+        <input id="fullNameInput" type="text" placeholder=" " class="float-input" autocomplete="off">
+        <label class="float-label">Full Name</label>
+      </div>
+      <div class="float-input-wrap mb-2">
+        <input id="phoneInput" type="tel" placeholder=" " class="float-input" autocomplete="off">
+        <label class="float-label">Phone Number</label>
+      </div>
+
+      <div class="mb-2">
+        <label class="block text-[11px] font-mono uppercase tracking-wide text-slate-500 mb-2 mt-4">Select City</label>
+        <div class="relative">
+          <select id="citySelect" class="w-full appearance-none bg-white/[0.03] border border-slate-700/50 rounded-xl px-4 py-3.5 text-[14px] text-slate-200 focus:border-emerald-500 transition-colors">
+            <option value="" disabled selected>Choose your city</option>
+            <option value="Delhi">Delhi</option>
+            <option value="Mumbai">Mumbai</option>
+            <option value="Bengaluru">Bengaluru</option>
+            <option value="Chandigarh">Chandigarh</option>
+            <option value="Mohali">Mohali</option>
+            <option value="Pune">Pune</option>
+            <option value="Hyderabad">Hyderabad</option>
+            <option value="Kolkata">Kolkata</option>
+            <option value="Ahmedabad">Ahmedabad</option>
+            <option value="Jaipur">Jaipur</option>
+          </select>
+          <svg class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="#8B93A7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+
+      <p id="credentialsError" class="hidden text-[12px] text-rose-400 mt-2 mb-1">Please enter your name, phone number, and city.</p>
+
+      <button id="requestOtpBtn" class="glow-btn mt-6 w-full bg-emerald-500 hover:bg-emerald-400 transition-colors text-slate-950 font-semibold rounded-full py-3.5 text-[14.5px]">
+        Request OTP
+      </button>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div id="authStepOtp" class="hidden">
+      <button id="backToCredentialsBtn" class="flex items-center gap-1.5 text-[12.5px] text-slate-400 hover:text-white transition-colors mb-6">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <h2 class="font-display text-[24px] font-medium text-white mb-1.5">Verify your number</h2>
+      <p id="otpSentText" class="text-[13.5px] text-slate-400 mb-7">Enter the 4-digit code sent to your phone.</p>
+
+      <div class="flex items-center justify-center gap-3 mb-3">
+        <input maxlength="1" inputmode="numeric" class="otp-input" data-idx="0">
+        <input maxlength="1" inputmode="numeric" class="otp-input" data-idx="1">
+        <input maxlength="1" inputmode="numeric" class="otp-input" data-idx="2">
+        <input maxlength="1" inputmode="numeric" class="otp-input" data-idx="3">
+      </div>
+      <p class="text-center text-[11.5px] text-slate-500 font-mono mb-7">Demo Mode: Enter any 4 digits to log in.</p>
+
+      <button id="verifyLoginBtn" class="glow-btn w-full bg-emerald-500 hover:bg-emerald-400 transition-colors text-slate-950 font-semibold rounded-full py-3.5 text-[14.5px]">
+        Verify &amp; Login
+      </button>
+    </div>
+
+    <!-- Step 3: success -->
+    <div id="authStepSuccess" class="hidden text-center py-6">
+      <div class="checkmark-pop w-16 h-16 mx-auto rounded-full bg-emerald-500/15 flex items-center justify-center mb-5">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path class="stroke-draw" d="M5 13L9 17L19 7" stroke="#10B981" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </div>
+      <p class="font-display text-[19px] font-medium text-white">You're verified</p>
+      <p class="text-[13px] text-slate-400 mt-1.5">Taking you to your dashboard…</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TOAST CONTAINER (bottom-center) ================= -->
+<div id="toastContainer" class="fixed bottom-8 left-1/2 z-[100] w-[92vw] max-w-md"></div>
+
+<!-- ================= DASHBOARD ================= -->
+<div id="dashboard" class="hidden dash-hidden">
+
+  <!-- Sticky header -->
+  <header class="sticky top-4 z-50 px-4">
+    <div class="max-w-6xl mx-auto glass-nav rounded-full px-5 sm:px-6 h-[64px] flex items-center justify-between border border-slate-800/50">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shrink-0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2C8 6 5 9.5 5 13.5C5 17.6 8.1 21 12 21C15.9 21 19 17.6 19 13.5C19 9.5 16 6 12 2Z" stroke="white" stroke-width="1.9" stroke-linejoin="round"/></svg>
+        </div>
+        <p id="headerGreeting" class="text-[14px] sm:text-[15px] font-medium text-white truncate">Welcome back ✨</p>
+      </div>
+
+      <div id="rewardsBadge" class="flex items-center gap-2 bg-white/5 border border-slate-700/50 rounded-full pl-2 pr-4 py-1.5 shrink-0 transition-shadow">
+        <div class="relative w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center">
+          <svg class="sparkle-twinkle" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2L13.8 8.6L20 10L13.8 11.4L12 18L10.2 11.4L4 10L10.2 8.6L12 2Z" fill="white"/></svg>
+        </div>
+        <div class="leading-tight">
+          <p class="text-[10px] text-slate-400 -mb-0.5">Civic Impact</p>
+          <p class="text-[13px] font-semibold text-white font-mono"><span id="impactPoints">450</span> pts</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero / Impact Hub -->
+  <section class="max-w-6xl mx-auto px-5 sm:px-8 pt-14 pb-8 lg:pt-20">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <p class="font-mono text-[12px] uppercase tracking-[0.15em] text-emerald-400 mb-4">Report · Route · Rescue</p>
+      <h1 class="font-display text-[2.4rem] sm:text-[3.1rem] leading-[1.08] font-medium tracking-tight text-white">
+        A cleaner city,<br class="hidden sm:block"> a <span class="text-amber-400">kinder</span> one too.
+      </h1>
+      <p class="mt-5 text-slate-400 text-[15.5px] leading-relaxed">
+        Snap a photo. Our AI reads it, then quietly routes it to your municipality — or, for an animal in need, straight to the nearest rescue NGO.
+      </p>
+    </div>
+
+    <div class="glass-panel glow-emerald rounded-[2rem] p-6 sm:p-10 max-w-3xl mx-auto">
+
+      <div id="reportFormStep">
+        <div id="dropZone" class="drop-zone rounded-3xl border border-slate-700/50 bg-white/[0.02] h-40 flex flex-col items-center justify-center gap-3 cursor-pointer mb-7">
+          <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16V18C4 19.1 4.9 20 6 20H18C19.1 20 20 19.1 20 18V16" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <p id="dropZoneText" class="text-[14px] text-slate-300 font-medium">Drop a photo here, or tap to simulate an upload</p>
+          <p class="text-[12px] text-slate-500 font-mono">Selected: <span id="selectedIssueLabel">Air Pollution</span></p>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-center gap-3 mb-8">
+          <button data-type="smoke" class="issue-pill pill-btn selected-pill flex items-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-medium">
+            💨 Report Air Pollution
+          </button>
+          <button data-type="garbage" class="issue-pill pill-btn flex items-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-medium bg-white/5 text-slate-300 border border-slate-700/50">
+            🗑️ Report Waste
+          </button>
+          <button data-type="animal" class="issue-pill pill-btn flex items-center gap-2 rounded-full px-5 py-2.5 text-[13.5px] font-medium bg-white/5 text-slate-300 border border-slate-700/50">
+            🚨 Rescue Stray Animal <span class="text-amber-400 font-semibold">(New)</span>
+          </button>
+        </div>
+
+        <button id="submitReportBtn" class="glow-btn block mx-auto bg-emerald-500 hover:bg-emerald-400 transition-colors text-slate-950 font-semibold rounded-full px-8 py-3.5 text-[14.5px]">
+          Analyze &amp; Submit Report
+        </button>
+      </div>
+
+      <div id="reportProcessingStep" class="hidden py-10 text-center">
+        <div class="relative w-16 h-16 mx-auto mb-6">
+          <div class="absolute inset-0 rounded-full border-[3px] border-slate-800"></div>
+          <div class="absolute inset-0 rounded-full border-[3px] border-emerald-500 border-t-transparent animate-spin"></div>
+          <div class="absolute inset-0 flex items-center justify-center font-mono text-[10px] text-emerald-400 font-semibold">AI</div>
+        </div>
+        <p class="font-display text-[19px] font-medium text-white">Reading your report…</p>
+        <p id="processingSubtext" class="text-[13.5px] text-slate-400 mt-1.5">Classifying image and finding the nearest responder</p>
+        <div class="mt-6 h-1.5 rounded-full shimmer w-3/5 mx-auto"></div>
+      </div>
+
+      <div id="reportResultStep" class="hidden text-center py-4">
+        <div id="resultIcon" class="w-14 h-14 mx-auto rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-5">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13L9 17L19 7" stroke="#10B981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3 id="resultTitle" class="font-display text-[20px] font-medium text-white mb-2">Report sent</h3>
+        <p id="resultBody" class="text-[13.5px] text-slate-400 leading-relaxed mb-7 px-4 max-w-sm mx-auto">Your report has been routed successfully.</p>
+        <button id="resetReportBtn" class="bg-white/5 border border-slate-700/50 text-slate-300 hover:bg-white/10 transition-colors font-medium rounded-full px-7 py-3 text-[13.5px]">
+          Report another issue
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live Matrix -->
+  <section class="max-w-6xl mx-auto px-5 sm:px-8 py-16 lg:py-24">
+    <div class="text-center max-w-xl mx-auto mb-12">
+      <p class="font-mono text-[12px] uppercase tracking-[0.15em] text-slate-500 mb-3">Live matrix</p>
+      <h2 class="font-display text-[2.1rem] font-medium tracking-tight text-white">What's moving right now</h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="float-card glass-panel glow-emerald rounded-3xl p-7" style="animation-delay:0s">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-6">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 8H14C16.2 8 18 6.2 18 4" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"/><path d="M4 13H17C19.2 13 21 14.8 21 17C21 19.2 19.2 21 17 21" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"/><path d="M4 18H10" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <p class="font-display text-[19px] font-medium text-white mb-1.5">Air Quality</p>
+        <p class="text-[13.5px] text-slate-400 leading-relaxed mb-6">Smoke and AQI spikes flagged nearby, sent to your municipality.</p>
+        <div class="space-y-3 pt-5 border-t border-slate-800">
+          <div class="flex items-center justify-between text-[13px]">
+            <span class="text-slate-300">Sector 9 · Factory smoke</span>
+            <span class="font-mono text-[11px] text-emerald-400">Assigned</span>
+          </div>
+          <div class="flex items-center justify-between text-[13px]">
+            <span class="text-slate-300">Riverside Rd · Haze</span>
+            <span class="font-mono text-[11px] text-amber-400">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="float-card glass-panel rounded-3xl p-7" style="animation-delay:.4s; box-shadow:0 0 60px rgba(14,165,233,0.05);">
+        <div class="w-12 h-12 rounded-2xl bg-sky-500/10 flex items-center justify-center mb-6">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M6 7H18L17 20H7L6 7Z" stroke="#38BDF8" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 7H20" stroke="#38BDF8" stroke-width="1.8" stroke-linecap="round"/><path d="M9 7L10 4H14L15 7" stroke="#38BDF8" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="font-display text-[19px] font-medium text-white mb-1.5">Waste Mismanagement</p>
+        <p class="text-[13.5px] text-slate-400 leading-relaxed mb-6">Overflowing bins and dumping routed to sanitation crews.</p>
+        <div class="space-y-3 pt-5 border-t border-slate-800">
+          <div class="flex items-center justify-between text-[13px]">
+            <span class="text-slate-300">Market St · Overflow bin</span>
+            <span class="font-mono text-[11px] text-emerald-400">Resolved</span>
+          </div>
+          <div class="flex items-center justify-between text-[13px]">
+            <span class="text-slate-300">Block C Park · Dumping</span>
+            <span class="font-mono text-[11px] text-amber-400">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="float-card relative glass-panel glow-amber rounded-3xl p-7 border-amber-500/20" style="animation-delay:.8s;">
+        <span class="absolute top-5 right-5 flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/30 rounded-full px-3 py-1 gentle-ring">
+          <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+          <span class="font-mono text-[10px] text-rose-300 font-semibold uppercase tracking-wide">Direct NGO Routing</span>
+        </span>
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center mb-6">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 5 16.5 5 11.2C5 8.3 7.2 6 10 6C11.2 6 12 6.8 12 6.8C12 6.8 12.8 6 14 6C16.8 6 19 8.3 19 11.2C19 16.5 12 21 12 21Z" stroke="#F59E0B" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="font-display text-[19px] font-medium text-white mb-1.5">Stray Animal Rescue</p>
+        <p class="text-[13.5px] text-slate-400 leading-relaxed mb-6">Skips municipal red tape entirely — routed straight to the nearest NGO.</p>
+        <div class="space-y-3 pt-5 border-t border-amber-500/10">
+          <div class="flex items-center justify-between text-[13px]">
+            <span class="text-slate-300">Sector 4 · Injured cow</span>
+            <span class="font-mono text-[11px] text-rose-300">Ambulance en route</span>
+          </div>
+          <div class="flex items-center justify-between text-[13px]">
+            <span class="text-slate-300">Main Market · Distressed dog</span>
+            <span class="font-mono text-[11px] text-rose-300">NGO notified</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Compassionate Cities workflow -->
+  <section class="max-w-6xl mx-auto px-5 sm:px-8 pb-24 lg:pb-32">
+    <div class="glass-panel glow-amber rounded-[2.5rem] p-8 sm:p-14">
+      <div class="max-w-2xl mb-14">
+        <p class="font-mono text-[12px] uppercase tracking-[0.15em] text-amber-400 mb-3">Compassionate Cities</p>
+        <h2 class="font-display text-[2rem] sm:text-[2.3rem] font-medium tracking-tight text-white leading-tight">
+          From a photo to a rescue, in three quiet steps
+        </h2>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-12 lg:gap-8">
+
+        <div class="relative step-track">
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-6">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="7" width="18" height="13" rx="2" stroke="#10B981" stroke-width="1.8"/><path d="M8 7L9.5 4H14.5L16 7" stroke="#10B981" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13.5" r="3.2" stroke="#10B981" stroke-width="1.8"/></svg>
+          </div>
+          <p class="font-mono text-[11px] text-emerald-400 mb-2">STEP 01</p>
+          <p class="font-display text-white text-[18px] font-medium mb-2.5">Smart Snap</p>
+          <p class="text-slate-400 text-[13.5px] leading-relaxed">The AI reads the photo instantly and detects whether it's a dog, cow, or another animal in need.</p>
+        </div>
+
+        <div class="relative step-track">
+          <div class="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-6">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#FB7185" stroke-width="1.8"/><path d="M12 7V12L15 14" stroke="#FB7185" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <p class="font-mono text-[11px] text-rose-300 mb-2">STEP 02</p>
+          <p class="font-display text-white text-[18px] font-medium mb-2.5">Emergency NGO Bypass</p>
+          <p class="text-slate-400 text-[13.5px] leading-relaxed mb-5">The standard municipal route is skipped — the alert goes straight to the nearest local animal NGO.</p>
+
+          <div class="bg-white/[0.03] border border-slate-800 rounded-2xl p-4">
+            <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-2.5">
+              <span class="line-through decoration-slate-600">Municipality</span>
+              <span class="text-rose-300 font-semibold">Nearest NGO</span>
+            </div>
+            <svg width="100%" height="28" viewBox="0 0 220 28">
+              <circle cx="10" cy="14" r="5" fill="#334155"/>
+              <path d="M10 14 L210 14" stroke="#FB7185" stroke-width="2" class="flow-dash" opacity="0.85"/>
+              <circle cx="210" cy="14" r="6" fill="#FB7185"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="relative">
+          <div class="w-14 h-14 rounded-2xl bg-sky-500/10 flex items-center justify-center mb-6">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 5 16.5 5 11.2C5 8.3 7.2 6 10 6C11.2 6 12 6.8 12 6.8C12 6.8 12.8 6 14 6C16.8 6 19 8.3 19 11.2C19 16.5 12 21 12 21Z" stroke="#38BDF8" stroke-width="1.8"/></svg>
+          </div>
+          <p class="font-mono text-[11px] text-sky-300 mb-2">STEP 03</p>
+          <p class="font-display text-white text-[18px] font-medium mb-2.5">Real-Time Geotag Dispatch</p>
+          <p class="text-slate-400 text-[13.5px] leading-relaxed mb-5">Your GPS pin travels with the report, so the rescue team drives straight there.</p>
+
+          <div class="relative h-24 rounded-2xl overflow-hidden bg-slate-900/60 border border-slate-800">
+            <svg class="absolute inset-0 w-full h-full opacity-30" viewBox="0 0 220 96" preserveAspectRatio="none">
+              <path d="M0 65 Q60 40 120 65 T220 55" stroke="#475569" stroke-width="8" fill="none"/>
+            </svg>
+            <div class="drive-across absolute top-1/2 -translate-y-1/2 text-[16px]">🚑</div>
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 text-[16px]">📍</div>
+            <div class="absolute bottom-2 left-2 right-2 bg-slate-950/70 backdrop-blur border border-slate-800 rounded-xl px-2.5 py-1.5 text-center">
+              <p class="font-mono text-[10px] text-rose-300 font-semibold">NGO Ambulance en route · 12 mins</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <footer class="pb-10">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="font-display text-slate-300 text-[14px]">CleanAir <span class="text-emerald-400">AI</span></p>
+      <p class="font-mono text-[11px] text-slate-500">Prototype build · for demonstration purposes only</p>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ================= AUTH FLOW =================
+  const authScreen = document.getElementById('authScreen');
+  const dashboard = document.getElementById('dashboard');
+  const stepCredentials = document.getElementById('authStepCredentials');
+  const stepOtp = document.getElementById('authStepOtp');
+  const stepSuccess = document.getElementById('authStepSuccess');
+
+  const fullNameInput = document.getElementById('fullNameInput');
+  const phoneInput = document.getElementById('phoneInput');
+  const credentialsError = document.getElementById('credentialsError');
+  const otpSentText = document.getElementById('otpSentText');
+
+  let userName = '';
+
+  document.getElementById('requestOtpBtn').addEventListener('click', () => {
+    const name = fullNameInput.value.trim();
+    const phone = phoneInput.value.trim();
+    if(!name || !phone){
+      credentialsError.classList.remove('hidden');
+      return;
+    }
+    credentialsError.classList.add('hidden');
+    userName = name;
+    otpSentText.textContent = `Enter the 4-digit code sent to ${phone}.`;
+
+    stepCredentials.classList.add('hidden');
+    stepOtp.classList.remove('hidden');
+    stepOtp.classList.add('fade-slide-left');
+    setTimeout(() => document.querySelector('.otp-input[data-idx="0"]').focus(), 100);
+  });
+
+  document.getElementById('backToCredentialsBtn').addEventListener('click', () => {
+    stepOtp.classList.add('hidden');
+    stepCredentials.classList.remove('hidden');
+  });
+
+  // OTP inputs: auto-advance
+  const otpInputs = Array.from(document.querySelectorAll('.otp-input'));
+  otpInputs.forEach((input, i) => {
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0,1);
+      if(input.value && i < otpInputs.length - 1){
+        otpInputs[i+1].focus();
+      }
+    });
+    input.addEventListener('keydown', (e) => {
+      if(e.key === 'Backspace' && !input.value && i > 0){
+        otpInputs[i-1].focus();
+      }
+    });
+  });
+
+  document.getElementById('verifyLoginBtn').addEventListener('click', () => {
+    // Demo mode: accept any 4 digits (or even empty — always proceed)
+    stepOtp.classList.add('hidden');
+    stepSuccess.classList.remove('hidden');
+
+    setTimeout(() => {
+      authScreen.classList.add('auth-hidden');
+      dashboard.classList.remove('hidden');
+      requestAnimationFrame(() => dashboard.classList.remove('dash-hidden'));
+      document.getElementById('headerGreeting').textContent = `Welcome back, ${userName} ✨`;
+      // Once the fade-out finishes, fully remove authScreen from the document
+      // flow (display:none) — otherwise its min-h-screen height keeps
+      // reserving empty space above the dashboard even while invisible.
+      setTimeout(() => authScreen.classList.add('hidden'), 550);
+    }, 1300);
+  });
+
+  // ================= DASHBOARD =================
+
+  // Points counter
+  let points = 450;
+  const pointsEl = document.getElementById('impactPoints');
+  const badge = document.getElementById('rewardsBadge');
+
+  function animatePointsTo(target){
+    const start = points;
+    const diff = target - start;
+    const duration = 900;
+    const startTime = performance.now();
+    function tick(now){
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      pointsEl.textContent = Math.round(start + diff * eased);
+      if(progress < 1){
+        requestAnimationFrame(tick);
+      } else {
+        points = target;
+        pointsEl.classList.add('counter-pulse');
+        setTimeout(() => pointsEl.classList.remove('counter-pulse'), 700);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+
+  // Bottom-center toast
+  function showToast({body}){
+    const container = document.getElementById('toastContainer');
+    container.innerHTML = '';
+    const el = document.createElement('div');
+    el.className = 'toast-rise glass-panel glow-emerald rounded-2xl px-5 py-4 text-center';
+    el.innerHTML = `<p class="text-[13.5px] text-slate-100 font-medium leading-relaxed">${body}</p>`;
+    container.appendChild(el);
+    setTimeout(() => {
+      el.classList.remove('toast-rise');
+      el.classList.add('toast-fall');
+      setTimeout(() => el.remove(), 380);
+    }, 4400);
+  }
+
+  // Issue pill selection
+  let selectedType = 'smoke';
+  const labelMap = { smoke:'Air Pollution', garbage:'Waste', animal:'Stray Animal Rescue' };
+  const pills = document.querySelectorAll('.issue-pill');
+  const selectedLabel = document.getElementById('selectedIssueLabel');
+
+  function selectPill(type){
+    selectedType = type;
+    selectedLabel.textContent = labelMap[type];
+    pills.forEach(p => {
+      p.classList.remove('selected-pill','bg-emerald-500','bg-rose-500','text-slate-950','text-white');
+      p.classList.add('bg-white/5','text-slate-300','border','border-slate-700/50');
+    });
+    const btn = document.querySelector(`.issue-pill[data-type="${type}"]`);
+    btn.classList.remove('bg-white/5','text-slate-300','border','border-slate-700/50');
+    if(type === 'animal'){
+      btn.classList.add('selected-pill','bg-rose-500','text-white');
+    } else {
+      btn.classList.add('selected-pill','bg-emerald-500','text-slate-950');
+    }
+  }
+  pills.forEach(p => p.addEventListener('click', () => selectPill(p.dataset.type)));
+  selectPill('smoke');
+
+  // Drop zone
+  const dropZone = document.getElementById('dropZone');
+  const dropZoneText = document.getElementById('dropZoneText');
+  dropZone.addEventListener('click', attachPhoto);
+  dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-active'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-active'));
+  dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.classList.remove('drag-active'); attachPhoto(); });
+  function attachPhoto(){ dropZoneText.textContent = '✓ photo_capture_04.jpg attached'; }
+
+  // Report flow
+  const formStep = document.getElementById('reportFormStep');
+  const processingStep = document.getElementById('reportProcessingStep');
+  const resultStep = document.getElementById('reportResultStep');
+  const processingSubtext = document.getElementById('processingSubtext');
+
+  document.getElementById('submitReportBtn').addEventListener('click', () => {
+    formStep.classList.add('hidden');
+    processingStep.classList.remove('hidden');
+    const subtextMap = {
+      smoke: 'Estimating AQI impact and alerting your municipality',
+      garbage: 'Locating the nearest sanitation route for pickup',
+      animal: 'Bypassing municipality — locating the nearest registered NGO'
+    };
+    processingSubtext.textContent = subtextMap[selectedType];
+
+    setTimeout(() => {
+      processingStep.classList.add('hidden');
+      resultStep.classList.remove('hidden');
+      showResult(selectedType);
+    }, 1800);
+  });
+
+  function showResult(type){
+    const title = document.getElementById('resultTitle');
+    const body = document.getElementById('resultBody');
+    const icon = document.getElementById('resultIcon');
+
+    if(type === 'animal'){
+      icon.className = 'w-14 h-14 mx-auto rounded-2xl bg-rose-500/10 flex items-center justify-center mb-5';
+      icon.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 21C12 21 5 16.5 5 11.2C5 8.3 7.2 6 10 6C11.2 6 12 6.8 12 6.8C12 6.8 12.8 6 14 6C16.8 6 19 8.3 19 11.2C19 16.5 12 21 12 21Z" stroke="#FB7185" stroke-width="2"/></svg>`;
+      title.textContent = 'Rescue alert sent';
+      body.textContent = 'Your report went straight to the nearest Animal Welfare NGO — no municipal queue.';
+      animatePointsTo(points + 50);
+      showToast({ body: '🕊️ Alert routed directly to Nearby Animal Welfare NGO. Live GPS shared.' });
+    } else {
+      icon.className = 'w-14 h-14 mx-auto rounded-2xl bg-emerald-500/10 flex items-center justify-center mb-5';
+      icon.innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13L9 17L19 7" stroke="#10B981" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      title.textContent = 'Report submitted';
+      body.textContent = type === 'smoke'
+        ? 'Your air quality report was sent to the municipal environmental team.'
+        : 'Your waste report was sent to the sanitation department for pickup.';
+      animatePointsTo(points + 20);
+      showToast({ body: type === 'smoke' ? '💨 Report sent to your municipality. Civic points added.' : '🗑️ Report sent to sanitation crews. Civic points added.' });
+    }
+  }
+
+  document.getElementById('resetReportBtn').addEventListener('click', () => {
+    resultStep.classList.add('hidden');
+    formStep.classList.remove('hidden');
+    dropZoneText.textContent = 'Drop a photo here, or tap to simulate an upload';
+  });
+})();
+</script>
+</body>
+</html>
